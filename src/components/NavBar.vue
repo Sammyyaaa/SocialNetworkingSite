@@ -33,7 +33,7 @@ import TheIcon from "./TheIcon.vue";
 import { useStore } from "vuex";
 import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import mine from '../assets/photo/0.jpg';
+const mine = `${import.meta.env.BASE_URL}photo/0.jpg`;
 
 const store = useStore();
 const router = useRouter();

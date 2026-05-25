@@ -104,7 +104,7 @@ const hasMyComment = computed(() =>
 );
 
 function userPhoto(n) {
-    return `src/assets/photo/${n}.jpg`;
+    return `${import.meta.env.BASE_URL}photo/${n}.jpg`;
 }
 
 const addReplyText = () => {

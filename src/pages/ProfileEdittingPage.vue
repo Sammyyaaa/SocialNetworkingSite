@@ -48,7 +48,7 @@
 <script setup>
 import TheAvatar from '../components/TheAvatar.vue';
 import TheButton from '../components/TheButton.vue';
-import mine from '../assets/photo/0.jpg';
+const mine = `${import.meta.env.BASE_URL}photo/0.jpg`;
 
 
 </script>

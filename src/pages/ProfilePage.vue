@@ -60,7 +60,7 @@ import TheAvatar from '../components/TheAvatar.vue';
 import PostUpload from '../components/PostUpload.vue';
 import { computed, ref, watch, reactive } from "vue";
 import { useStore } from "vuex";
-import mineImage from '../assets/photo/0.jpg';
+const mineImage = `${import.meta.env.BASE_URL}photo/0.jpg`;
 
 const store = useStore();
 const mine = store.state.comment.mine;

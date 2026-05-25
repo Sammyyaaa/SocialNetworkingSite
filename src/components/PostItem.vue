@@ -70,7 +70,7 @@ const hasMyComment = computed(() =>
 );
 
 function userPhoto() {
-    return `src/assets/photo/${userId}.jpg`;
+    return `${import.meta.env.BASE_URL}photo/${userId}.jpg`;
 }
 
 function openPostDetails() {

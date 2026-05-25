@@ -39,7 +39,7 @@ const router = createRouter({
     //-- 路由自定義配置
     routes: routes, 
     //--  HTML5 History API
-    history: createWebHistory(), 
+    history: createWebHistory(import.meta.env.BASE_URL),
 });
 
 export { router };
