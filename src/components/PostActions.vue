@@ -42,22 +42,20 @@ const emit = defineEmits([
 
 <style>
 .postActions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  justify-items: center;
-  column-gap: 16px;
-  row-gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .postActions > svg {
-  width: 32px;
-  height: 32px;
-  grid-row: 1/2;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
 }
 
-.postActions>span {
+.postActions > span {
   font-size: 14px;
+  color: var(--ig-text);
+  margin-right: 8px;
 }
-
 </style>

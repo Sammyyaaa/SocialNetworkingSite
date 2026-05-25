@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="editPage">
     <h2 class="title">編輯個人資料</h2>
     <!-- 更改頭像視窗 -->
     <div class="changeAvatar">
@@ -54,10 +54,18 @@ import mine from '../assets/photo/0.jpg';
 </script>
 
 <style scoped>
+.editPage {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  background: var(--ig-white);
+}
+
 .title {
   margin-bottom: 42px;
   font-size: 24px;
   font-weight: 600;
+  color: var(--ig-text);
 }
 
 .changeAvatar {
@@ -66,8 +74,25 @@ import mine from '../assets/photo/0.jpg';
   position: relative;
 }
 
-.changeAvatar .button {
+.changeAvatar :deep(.button) {
   margin-left: 26px;
+}
+
+.profileForm input[type="text"],
+.profileForm textarea {
+  background: #FAFAFA;
+  border: 1px solid var(--ig-border);
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--ig-text);
+  width: 100%;
+}
+
+.profileForm input[type="text"]:focus,
+.profileForm textarea:focus {
+  border-color: #a8a8a8;
+  outline: none;
 }
 
 .inputFile {

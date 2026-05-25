@@ -1,9 +1,9 @@
 <template>
     <nav class="navbar">
-        <router-link to="/"><img src="../assets/logo.svg" alt=""></router-link>
+        <router-link to="/"><span class="logo-text">Framio</span></router-link>
         <!-- 左側搜尋框 -->
         <div class="searchInput">
-            <input type="text" />
+            <input type="text" v-model="searchQuery" placeholder="搜尋..." />
             <TheIcon icon="search" />
         </div>
         <!-- 右側主頁 -->
@@ -31,99 +31,107 @@
 import TheAvatar from "./TheAvatar.vue";
 import TheIcon from "./TheIcon.vue";
 import { useStore } from "vuex";
+import { ref, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import mine from '../assets/photo/0.jpg';
+
 const store = useStore();
+const router = useRouter();
+const route = useRoute();
+const searchQuery = ref('');
+let debounceTimer = null;
+
+watch(searchQuery, (val) => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    router.push({ name: 'search_result', query: { q: val.trim() } });
+  }, 1000);
+});
+
+watch(() => route.name, (name) => {
+  if (name !== 'search_result') {
+    clearTimeout(debounceTimer);
+    searchQuery.value = '';
+  }
+});
+
 function publishPost() {
-  //-- 觸發 mutations changeShowPostUpload() 函數
   store.commit("changeShowPostUpload", true);
 };
 </script>
 
 <style scoped>
 .navbar {
-  width: 80vw;
-  height: 80px;
+  max-width: 935px;
+  height: 54px;
+  width: 100%;
   margin: 0 auto;
+  padding: 0 20px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 16px;
 }
+
 .navbar svg {
-  width: 38px;
-  height: 38px;
+  width: 24px;
+  height: 24px;
+}
+
+.logo-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ig-text);
+  letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
 .searchInput {
   position: relative;
+  max-width: 268px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .searchInput input {
   width: 100%;
-  padding: 12px;
-  padding-left: 36px;
+  padding: 8px 12px 8px 36px;
+  background: #EFEFEF;
+  border-radius: 8px;
+  border: 1px solid var(--ig-border);
+  font-size: 14px;
+  color: var(--ig-text);
+}
 
-  background: #f1f1f1;
-  border-radius: 14px;
-  border: none;
+.searchInput input::placeholder {
+  color: var(--ig-secondary);
 }
 
 .searchInput > svg {
   position: absolute;
-  left: 0;
-  top: 11px;
   left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ig-secondary);
 }
 
 .navItems {
   justify-self: end;
   display: flex;
-  gap: 24px;
+  gap: 16px;
   align-items: center;
 }
 
 .navItems > button {
   border: none;
   background: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
 }
 
 .profileDropDown {
   position: relative;
-}
-
-.profileMenu {
-  position: absolute;
-  width: max-content;
-  padding: 24px 26px;
-  list-style: none;
-  background: white;
-  box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.08);
-  border-radius: 4px;
-  right: 0;
-  display: grid;
-  row-gap: 18px;
-  transform: translateY(18px);
-}
-
-.profileMenu::before {
-  content: "";
-  display: block;
-  position: absolute;
-  width: 0;
-  height: 0;
-  top: -12px;
-  right: 10px;
-  border-bottom: 12px solid white;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-}
-
-.profileMenu a,
-.profileMenu li {
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.profileMenu a:visited {
-  color: initial;
 }
 </style>

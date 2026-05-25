@@ -9,9 +9,8 @@
 
 <style scoped>
 .content {
-    width: 80vw;
-    max-width: 1124px;
+    width: 100%;
     margin: 0 auto;
-    margin-top: 88px;
+    margin-top: 54px;
 }
 </style>

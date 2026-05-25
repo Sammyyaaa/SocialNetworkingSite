@@ -1,53 +1,87 @@
 <template>
-  <!-- 掛載至 body 的談窗容器 -->
   <TheModal @close="store.commit('changeShowPostDetails', false)">
-    <!-- 貼文詳情 -->
     <div class="postDetails">
+      <!-- 左側：貼文圖片 -->
       <img class="postImage" :src="users.postImage" alt="">
+      <!-- 右側：資訊欄 -->
       <div class="postMeta">
-        <div class="author">
-          <TheAvatar :src="userPhoto(userId)"/>
-          <span>{{ users.name }}</span>
+        <!-- Header：頭像 + 用戶名 + 關閉按鈕 -->
+        <div class="modal-header">
+          <TheAvatar :src="userPhoto(userId)" :width="32" :height="32" />
+          <span class="author-name">{{ users.name }}</span>
+          <button class="close-btn" @click="store.commit('changeShowPostDetails', false)">
+            <TheIcon icon="close" />
+          </button>
         </div>
-        <!-- 貼文訊息 -->
-        <pre class="postDesc">
-{{ users.postText }}
-        </pre>
-        <!-- 評論區塊: 滾動條 -->
+        <!-- 評論區（可捲動）：caption + 留言列表 -->
         <div class="comments">
-          <!-- 單個評論 -->
-          <div class="comment" 
-            v-for="n in users.response.length" 
-            :key="n">
-            <TheAvatar :src="userPhoto(users.response[n-1].id)" />
-            <span class="user">{{ users.response[n-1].name }}</span>
-            <!-- <span class="commentDate">1d</span> -->
-            <p class="commentContent">{{ users.response[n-1].ReplyText }}</p>
+          <!-- Caption -->
+          <div class="comment">
+            <TheAvatar :src="userPhoto(userId)" :width="32" :height="32" />
+            <div class="comment-body">
+              <span class="comment-username">{{ users.name }}</span>
+              <span class="comment-text">{{ users.postText }}</span>
+            </div>
+          </div>
+          <!-- 留言列表 -->
+          <div class="comment"
+            v-for="(reply, index) in users.response"
+            :key="index">
+            <TheAvatar :src="userPhoto(reply.id)" :width="32" :height="32" />
+            <div class="comment-body">
+              <span class="comment-username">{{ reply.name }}</span>
+              <span class="comment-text">{{ reply.ReplyText }}</span>
+            </div>
           </div>
         </div>
-        <!-- 評論、like、收藏 -->
+        <!-- 底部：操作 + 評論輸入 -->
         <div class="actions">
-          <PostActions 
-            :users="users"
-            @likeChange="$store.commit('likeChange', userId)"
-            @favoriteChange="$store.commit('favoriteChange', userId)"
-          />
+          <!-- 操作按鈕列 -->
+          <div class="actions-row">
+            <div class="actions-left">
+              <TheIcon
+                icon="like"
+                :fill="users.likeState ? '#ED4956' : 'none'"
+                :stroke="users.likeState ? '#ED4956' : '#262626'"
+                @click="$store.commit('likeChange', userId)"
+                class="action-icon"
+              />
+              <TheIcon
+                icon="comment"
+                :fill="hasMyComment ? '#0095F6' : 'none'"
+                :stroke="hasMyComment ? '#0095F6' : '#262626'"
+                class="action-icon"
+              />
+            </div>
+            <TheIcon
+              icon="favorite"
+              :fill="users.favoriteState ? 'gold' : 'none'"
+              :stroke="users.favoriteState ? 'gold' : '#262626'"
+              @click="$store.commit('favoriteChange', userId)"
+              class="action-icon"
+            />
+          </div>
+          <!-- 讚數 -->
+          <div class="likes-count">
+            <strong>{{ users.like }} 個讚</strong>
+          </div>
           <!-- 發布時間 -->
-          <span class="postPubDate">{{ users.time }}h</span>
-          <!-- 評論框 -->
-          <input
-            v-model="replyText" 
-            type="text" 
-            name="comment" 
-            id="" 
-            class="commentInput" 
-            placeholder="寫一則評論吧!" />
-          <button 
-            class="commentPubBtn"
-            @click="addReplyText"
-          >
-            發送
-          </button>
+          <div class="pub-date">{{ users.time }}小時前</div>
+          <!-- 評論輸入 -->
+          <div class="comment-input-row">
+            <input
+              v-model="replyText"
+              type="text"
+              class="commentInput"
+              placeholder="新增評論..."
+              @keyup.enter="addReplyText"
+            />
+            <button
+              class="commentPubBtn"
+              :disabled="!replyText"
+              @click="addReplyText"
+            >發佈</button>
+          </div>
         </div>
       </div>
     </div>
@@ -55,126 +89,192 @@
 </template>
 
 <script setup>
-import PostActions from "./PostActions.vue";
 import TheAvatar from "./TheAvatar.vue";
-import TheModal from "./TheModal.vue"
+import TheIcon from "./TheIcon.vue";
+import TheModal from "./TheModal.vue";
 import { useStore } from "vuex";
 import { computed, ref } from "vue";
+
 const store = useStore();
 const replyText = ref("");
 const userId = store.state.id;
-const users = computed(() => store.state.comment.users[userId-1]);
+const users = computed(() => store.state.comment.users[userId - 1]);
+const hasMyComment = computed(() =>
+    users.value.response.some(r => r.id === store.state.comment.mine.id)
+);
 
-function userPhoto(n){
+function userPhoto(n) {
     return `src/assets/photo/${n}.jpg`;
-};
+}
 
-//-- 新增評論
 const addReplyText = () => {
-  store.commit("addComment", { 
-    userId: userId, 
-    replyText: replyText});
-  replyText.value = "";
+    if (!replyText.value) return;
+    store.commit("addComment", {
+        userId: userId,
+        replyText: replyText
+    });
+    replyText.value = "";
 };
-
 </script>
 
 <style scoped>
 .postDetails {
-  display: grid;
-  grid-template-columns: 1fr minmax(auto, 300px);
-  grid-template-rows: minmax(0, 1fr);
-  width: 80vw;
-  height: 80vh;
-}
-.postImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.postMeta {
-  padding: 24px;
-  padding-top: 36px;
-  display: grid;
-  align-items: start;
-  grid-template-rows: max-content max-content 1fr max-content;
-  max-height: 100%;
-  height: 100%;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 335px);
+    width: 935px;
+    max-width: 90vw;
+    height: 600px;
+    max-height: 90vh;
 }
 
-.author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.postImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
-.postDesc {
-  width: 100%;
-  white-space: pre-wrap;
-  margin-top: 24px;
+
+.postMeta {
+    border-left: 1px solid var(--ig-border);
+    display: grid;
+    grid-template-rows: 60px 1fr auto;
+    max-height: 100%;
+    overflow: hidden;
+    background: #FFFFFF;
 }
+
+.modal-header {
+    height: 60px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--ig-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.author-name {
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    color: var(--ig-text);
+}
+
+.close-btn :deep(svg) {
+    width: 18px;
+    height: 18px;
+    stroke: var(--ig-text);
+    fill: var(--ig-text);
+}
+
 .comments {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-auto-rows: max-content;
-  grid-gap: 28px;
-  align-items: start;
-  overflow-y: auto;
-  height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
+
 .comment {
-  display: grid;
-  grid-template-areas:
-    "avatar name date"
-    "comment comment comment";
-  grid-template-columns: 34px 1fr 1fr;
-  align-items: center;
-  column-gap: 10px;
-  row-gap: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
 }
-.commentDate {
-  grid-area: date;
-  justify-self: end;
-  color: #a7a7a7;
+
+.comment-body {
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
 }
-.commentContent {
-  grid-area: comment;
+
+.comment-username {
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+.comment-text {
+    color: var(--ig-text);
+    white-space: pre-wrap;
 }
 
 .actions {
-  border-top: 1px solid #eaeaea;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: center;
-  margin: 20px -24px 0px -24px;
-  padding: 20px 24px 0 24px;
-  row-gap: 16px;
+    border-top: 1px solid var(--ig-border);
+    padding: 8px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.postActions > :deep(svg) {
-  transform: scale(0.8125);
+.actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.postPubDate {
-  color: #9f9f9f;
-  grid-column: 2 / 6;
-  justify-self: end;
-  font-size: 14px;
+
+.actions-left {
+    display: flex;
+    gap: 12px;
 }
+
+.action-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.likes-count {
+    font-size: 14px;
+}
+
+.pub-date {
+    font-size: 10px;
+    color: var(--ig-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.comment-input-row {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--ig-border);
+    padding-top: 8px;
+    gap: 8px;
+}
+
 .commentInput {
-  background: #f7f7f7;
-  border-radius: 16px;
-  border: none;
-  grid-column: 1 / 4;
+    flex: 1;
+    border: 1px solid var(--ig-border);
+    border-radius: 20px;
+    background: #FAFAFA;
+    font-size: 14px;
+    padding: 8px 14px;
+    color: #262626;
 }
+
 .commentInput::placeholder {
-  color: #b9b9b9;
-  border: none;
+    color: var(--ig-secondary);
 }
+
 .commentPubBtn {
-  color: #1da0ff;
-  border: none;
-  background: none;
-  font-size: 16px;
-  margin-left: 20px;
-  grid-column: 4 / 6;
+    background: none;
+    border: none;
+    color: var(--ig-blue);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.commentPubBtn:disabled {
+    opacity: 0.4;
+    cursor: default;
 }
 </style>

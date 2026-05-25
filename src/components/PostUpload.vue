@@ -3,6 +3,12 @@
     <TheModal @close="store.commit('changeShowPostUpload', false)">
         <!-- 貼文詳情內容 -->
         <div class="postUpload">
+            <div class="upload-header">
+                <span>新增貼文</span>
+                <button class="upload-close" @click="store.commit('changeShowPostUpload', false)">
+                    <TheIcon icon="close" />
+                </button>
+            </div>
             <label class="upload">
               <img v-if="imageObjUrl" :src="imageObjUrl" class="preview">
               <!-- <TheIcon v-else icon="upload-image" /> -->
@@ -60,31 +66,54 @@ async function handleImageUpload(e) {
 
 <style scoped>
 .postUpload {
-  width: 50vw;
-  height: 70vh;
+  width: 600px;
+  max-width: 90vw;
+  height: 500px;
   display: grid;
-  grid-template-rows: 4fr 1fr;
+  grid-template-rows: 43px 1fr auto;
+}
+
+.upload-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ig-border);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.upload-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.upload-close :deep(svg) {
+  width: 18px;
+  height: 18px;
 }
 
 .preview {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  min-height: 0;
 }
+
 .upload {
   display: grid;
   place-items: center;
   cursor: pointer;
-  min-height: 0;
+  background: var(--ig-bg);
 }
-.upload > svg {
-  width: 254px;
-  height: 316px;
-}
+
 .upload > #imgIcon {
-  width: 275px;
-  height: 295px;
+  width: 120px;
+  height: 120px;
+  opacity: 0.5;
 }
 
 .fileChooser {
@@ -93,24 +122,28 @@ async function handleImageUpload(e) {
 }
 
 .postContent {
-  display: grid;
+  border-top: 1px solid var(--ig-border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
 }
+
 .postContentInput {
-  border-bottom: none;
+  flex: 1;
+  border: none;
+  background: none;
   resize: none;
-  padding: 12px 24px;
+  padding: 12px 0;
+  font-size: 14px;
+  height: 60px;
 }
 
 .postContentInput::placeholder {
-  color: #757575;
+  color: var(--ig-secondary);
 }
 
-
 .pubBtn {
-  align-self: end;
-  justify-self: end;
-  position: relative;
-  right: 24px;
-  bottom: 18px;
+  flex-shrink: 0;
 }
 </style>

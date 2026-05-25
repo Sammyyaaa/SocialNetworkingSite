@@ -1,39 +1,53 @@
 <template>
-  <div>
-    <!-- 上半部分 -->
+  <div class="profilePage">
+    <!-- 上半部分：頭像 + 個人資料 -->
     <div class="profileContainer">
-      <TheAvatar :src="mineImage" :width="186" :height="186" />
+      <TheAvatar :src="mineImage" :width="150" :height="150" class="profile-avatar" />
       <!-- 個人資料 -->
       <div class="profile">
-        <p class="name">
-          <span>{{ mine.name }}</span>
-          <router-link to="/profile/edit">編輯個人資料</router-link>
-        </p>
-        <!-- 使用者名稱 -->
-        <p class="handle">@Sam_Yen</p>
-        <!-- 簡介 -->
-        <div class="description">
-          <pre>
-保持好奇心，持續學習，永不停止探索生命的奇蹟
-                    </pre>
+        <!-- 用戶名 + 編輯按鈕 -->
+        <div class="profile-top">
+          <span class="username">{{ mine.name }}</span>
+          <router-link to="/profile/edit" class="editBtn">編輯個人資料</router-link>
         </div>
-        <!-- 連結網站 -->
-        <p class="website">GitHub:</p>
-        <a href="https://github.com/Sammyyaaa">https://github.com</a>
+        <!-- Stats：貼文 / 粉絲 / 追蹤 -->
+        <div class="stats">
+          <span><strong>10</strong> 貼文</span>
+          <span><strong>128</strong> 粉絲</span>
+          <span><strong>96</strong> 追蹤中</span>
+        </div>
+        <!-- 簡介 -->
+        <div class="bio">
+          <p>保持好奇心，持續學習，永不停止探索生命的奇蹟</p>
+          <a href="https://github.com/Sammyyaaa" target="_blank" class="website-link">github.com/Sammyyaaa</a>
+        </div>
       </div>
     </div>
+
+    <!-- Tabs -->
     <div class="tabs">
-      <!-- 當前展示，樣式為藍色 -->
-      <div v-for="(tab, index) in tabs" class="tab" :class="{ active: index === currentTab }" :key="index"
-        @click="currentTab = index">
+      <div
+        v-for="(tab, index) in tabs"
+        class="tab"
+        :class="{ active: index === currentTab }"
+        :key="index"
+        @click="currentTab = index"
+      >
         <TheIcon :icon="tab.icon" />
-        <p>{{ tab.label }}</p>
+        <span>{{ tab.label }}</span>
       </div>
     </div>
+
+    <!-- Tab 內容：圖片網格 -->
     <div class="tabContent">
-      <p>{{ myPosts[currentTab].length }}</p>
       <div class="posts">
-        <img v-for="post in myPosts[currentTab]" :src="post.postImage" alt="" class="postImage"  />
+        <img
+          v-for="(post, index) in myPosts[currentTab]"
+          :key="index"
+          :src="post.postImage || post"
+          alt=""
+          class="postImage"
+        />
       </div>
     </div>
   </div>
@@ -47,149 +61,170 @@ import PostUpload from '../components/PostUpload.vue';
 import { computed, ref, watch, reactive } from "vue";
 import { useStore } from "vuex";
 import mineImage from '../assets/photo/0.jpg';
+
 const store = useStore();
 const mine = store.state.comment.mine;
 const showPostUpload = computed(() => store.state.showPostUpload);
-//-- like 文章
-const likePosts = store.state.comment.users.filter((likePost) => 
-  likePost.favoriteState === true );
-//-- favorite 文章
-const favorites = store.state.comment.users.filter((favorite) => 
-  favorite.likeState === true );
 
-  const tabs = ref([
-  {
-    label: "Posts",
-    icon: "posts",
-  },
-  {
-    label: "Like",
-    icon: "like",
-  },
-  {
-    label: "Favorite",
-    icon: "favorite",
-  },
+const likePosts = store.state.comment.users.filter((post) => post.favoriteState === true);
+const favorites = store.state.comment.users.filter((post) => post.likeState === true);
+const minePosts = store.state.comment.mine.postImages || [];
+
+const tabs = ref([
+  { label: "貼文", icon: "posts" },
+  { label: "喜愛", icon: "like" },
+  { label: "收藏", icon: "favorite" },
 ]);
-//-- 選擇中的 tab
+
 const currentTab = ref(0);
 
-const myPosts = reactive({
-  0: [],
-  1: [],
-  2: [],
-})
+const myPosts = reactive({ 0: [], 1: [], 2: [] });
 
-watch(currentTab, async () => {
+watch(currentTab, () => {
   switch (currentTab.value) {
     case 0:
-      if (myPosts[0].length === 0) {
-        myPosts[0] = minepostImage
-      }
+      if (myPosts[0].length === 0) myPosts[0] = minePosts;
       break;
     case 1:
-      if (myPosts[1].length === 0) {
-        myPosts[1] = favorites;
-      }
+      if (myPosts[1].length === 0) myPosts[1] = favorites;
       break;
     case 2:
-      if (myPosts[2].length === 0) {
-        myPosts[2] = likePosts;
-      }
+      if (myPosts[2].length === 0) myPosts[2] = likePosts;
       break;
   }
 }, { immediate: true });
 </script>
 
 <style scoped>
+.profilePage {
+  max-width: 935px;
+  margin: 0 auto;
+  padding: 30px 20px 0;
+}
+
 .profileContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 10vw;
+  display: flex;
+  align-items: flex-start;
+  gap: 80px;
+  padding-bottom: 40px;
 }
 
-.avatar {
-  justify-self: end;
+.profile {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
 }
 
-.profile .name {
+.profile-top {
   display: flex;
   align-items: center;
+  gap: 20px;
 }
 
-.profile .name>span {
-  font-size: 26px;
+.username {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ig-text);
 }
 
-.profile .name>a {
-  color: #1da0ff;
+.editBtn {
+  border: 1px solid var(--ig-border);
+  border-radius: 8px;
+  padding: 6px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ig-text);
+  background: none;
   text-decoration: none;
-  margin-left: 26px;
-}
-
-.profile .handle {
-  margin-top: 4px;
-  color: #848484;
-}
-
-.profile .description {
-  margin-top: 26px;
-  margin-bottom: 22px;
-}
-
-.tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 88px);
-  column-gap: 4vw;
-  justify-content: center;
-
-  margin-top: 7vmin;
-  margin-bottom: 20px;
-}
-
-.tab {
-  text-align: center;
-  padding: 12px 0;
   cursor: pointer;
 }
 
-.tab>svg {
-  width: 32px;
-  height: 32px;
-  stroke: #8a9194;
-  fill: #8a9194;
+.editBtn:hover {
+  background: var(--ig-bg);
+}
+
+.stats {
+  display: flex;
+  gap: 40px;
+  font-size: 16px;
+  color: var(--ig-text);
+}
+
+.stats span strong {
+  font-weight: 600;
+}
+
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.website-link {
+  color: #00376b;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Tabs */
+.tabs {
+  border-top: 1px solid var(--ig-border);
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  cursor: pointer;
+  border-top: 1px solid transparent;
+  margin-top: -1px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ig-secondary);
+}
+
+.tab > :deep(svg) {
+  width: 20px;
+  height: 20px;
+  stroke: var(--ig-secondary);
+  fill: var(--ig-secondary);
 }
 
 .tab.active {
-  background: #f6f9fb;
-  border-radius: 18px;
+  border-top-color: var(--ig-text);
+  color: var(--ig-text);
 }
 
-.tab.active>svg {
-  stroke: #1787d9;
-  fill: #1787d9;
+.tab.active > :deep(svg) {
+  stroke: var(--ig-text);
+  fill: var(--ig-text);
 }
 
-.tab.active>p {
-  color: #1787d9;
-}
-
-.tabContent>p {
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 32px;
+/* 圖片網格 */
+.tabContent {
+  margin-top: 4px;
 }
 
 .posts {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
 }
 
 .postImage {
   width: 100%;
-  height: 321px;
-  background: #eee;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
+  background: #EFEFEF;
+  cursor: pointer;
 }
 </style>

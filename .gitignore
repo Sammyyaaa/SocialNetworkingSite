@@ -1,0 +1,25 @@
+# 依賴套件
+node_modules/
+.pnp
+.pnp.js
+
+# 建構輸出
+dist/
+dist-ssr/
+*.local
+
+# 環境變數
+.env
+.env.local
+.env.*.local
+
+# 編輯器
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

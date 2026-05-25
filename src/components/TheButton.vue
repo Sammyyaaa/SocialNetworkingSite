@@ -22,18 +22,20 @@
 <style scoped>
 .button {
     border-radius: 8px;
-    padding: 10px 32px;
+    padding: 8px 24px;
     border: none;
     color: white;
-    font-size: 16px;
-    background: #1da0ff;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ig-blue);
+    cursor: pointer;
 }
-.button.premary {
-  background: #1da0ff;
+.button:hover {
+  background: #1aa3ff;
 }
 .button.reverse {
   background: none;
-  border: 1px solid #e8e8e8;
-  color: initial;
+  border: 1px solid var(--ig-border);
+  color: var(--ig-text);
 }
 </style>

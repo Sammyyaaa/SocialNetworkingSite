@@ -1,109 +1,176 @@
 <template>
-    <!-- 貼文的容器 -->
-    <div class="postItem" @click="userIdUpdate">
-        <img @click="PostDetails()" :src="users.postImage" alt="" width="100%" height="100%" style="background: #eee; /">
-        <!-- 發布訊息 -->
-        <div class="postInfo">
-            <div class="postMeta">
-                <TheAvatar :src="userPhoto()" />
-                <span class="postName">{{ users.name }}</span>
-                <span class="postPubDate">{{ users.time}} 小時前發布</span>
-                <PostActions 
-                  :users="users"
-                  @likeChange="$store.commit('likeChange', userId)"
-                  @favoriteChange="$store.commit('favoriteChange', userId)"
+    <div class="postItem">
+        <!-- IG 風格 Header：頭像 + 用戶名 + 時間 -->
+        <div class="post-header">
+            <TheAvatar :src="userPhoto()" :width="32" :height="32" />
+            <span class="post-username">{{ users.name }}</span>
+            <span class="post-time">{{ users.time }}小時前</span>
+        </div>
+        <!-- 全寬方形圖片 -->
+        <div class="post-image" @dblclick="$store.commit('likeChange', userId)">
+            <img :src="users.postImage" alt="" />
+        </div>
+        <!-- 操作列：讚、評論在左；收藏在右 -->
+        <div class="post-actions-row">
+            <div class="post-actions-left">
+                <TheIcon
+                  icon="like"
+                  :fill="users.likeState ? '#ED4956' : 'none'"
+                  :stroke="users.likeState ? '#ED4956' : '#262626'"
+                  @click="$store.commit('likeChange', userId)"
+                  class="action-icon"
+                />
+                <TheIcon
+                  icon="comment"
+                  :fill="hasMyComment ? '#0095F6' : 'none'"
+                  :stroke="hasMyComment ? '#0095F6' : '#262626'"
+                  @click="openPostDetails"
+                  class="action-icon"
                 />
             </div>
-            <!-- 貼文描述 -->
-            <div class="postDesc">
-                <p>
-                  {{ users.postText }}
-                </p>
-            </div>
+            <TheIcon
+              icon="favorite"
+              :fill="users.favoriteState ? 'gold' : 'none'"
+              :stroke="users.favoriteState ? 'gold' : '#262626'"
+              @click="$store.commit('favoriteChange', userId)"
+              class="action-icon"
+            />
         </div>
+        <!-- 讚數 -->
+        <div class="post-likes">
+            <strong>{{ users.like }} 個讚</strong>
+        </div>
+        <!-- 貼文說明 -->
+        <div class="post-caption">
+            <strong class="post-caption-name">{{ users.name }}</strong>
+            {{ users.postText }}
+        </div>
+        <!-- 查看評論 -->
+        <div v-if="users.response.length > 0" class="post-comments-link" @click="openPostDetails">
+            查看所有 {{ users.response.length }} 則評論
+        </div>
+        <!-- 發布時間 -->
+        <div class="post-pubdate">{{ users.time }} 小時前</div>
     </div>
 </template>
+
 <script setup>
 import TheAvatar from "../components/TheAvatar.vue";
-import PostActions from "../components/PostActions.vue";
+import TheIcon from "../components/TheIcon.vue";
 import { useStore } from "vuex";
-import { computed, provide } from "vue";
+import { computed } from "vue";
+
 const props = defineProps(["userId"]);
 const store = useStore();
-provide('userId', props.id);
-//-- 使用者
-const users = computed(() => store.state.comment.users[props.userId-1]);
-const userId = users.value.id
-const photo = computed(() => users.value.photo);
 
-function userPhoto(){
+const users = computed(() => store.state.comment.users[props.userId - 1]);
+const userId = users.value.id;
+const hasMyComment = computed(() =>
+    users.value.response.some(r => r.id === store.state.comment.mine.id)
+);
+
+function userPhoto() {
     return `src/assets/photo/${userId}.jpg`;
-};
+}
 
-//-- 顯示貼文彈跳視窗 + userId 傳遞
-function PostDetails() {
-  store.commit("changeShowPostDetails", {
-    show: true, 
-    userId:props.userId});
-};
+function openPostDetails() {
+    store.commit("changeId", props.userId);
+    store.commit("changeShowPostDetails", {
+        show: true,
+        userId: props.userId
+    });
+}
 </script>
 
 <style scoped>
 .postItem {
-  box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.2s;
-}
-.postItem:hover{
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-  transform: scale(1);
-  overflow: hidden;
-  transition: all 0.4s;
+    background: var(--ig-white);
+    border-bottom: 1px solid var(--ig-border);
+    padding-bottom: 12px;
+    margin-bottom: 4px;
 }
 
-.postInfo {
-  padding: 24px;
-  z-index: 999;
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 12px 8px;
 }
 
-.postItem > img {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-  background: #eee;
-  cursor: pointer;
+.post-username {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ig-text);
+    flex: 1;
 }
 
-.postMeta {
-  display: grid;
-  grid-template-areas:
-    "avatar name actions"
-    "pubDate pubDate actions";
-  grid-template-columns: 42px 1fr 3fr;
-  row-gap: 6px;
-}
-.postMeta .avatar {
-  grid-area: avatar;
-}
-.postMeta .postName {
-  margin-top: 10px;
+.post-time {
+    font-size: 12px;
+    color: var(--ig-secondary);
 }
 
-.postMeta .postPubDate {
-  grid-area: pubDate;
-  color: #9f9f9f;
-  font-size: 14px;
-  margin-left: 3px;
+.post-image {
+    width: 100%;
 }
 
-.postActions {
-  grid-area: actions;
-  justify-self: end;
+.post-image img {
+    width: 100%;
+    max-height: 470px;
+    object-fit: cover;
+    display: block;
+    background: #EFEFEF;
 }
 
-.postDesc {
-  margin-top: 28px;
-  white-space: pre-line;
+.post-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px 4px;
+}
+
+.post-actions-left {
+    display: flex;
+    gap: 12px;
+}
+
+.action-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.post-likes {
+    padding: 0 12px 4px;
+    font-size: 14px;
+}
+
+.post-caption {
+    padding: 0 12px 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.post-caption-name {
+    margin-right: 4px;
+}
+
+.post-comments-link {
+    padding: 0 12px 2px;
+    font-size: 14px;
+    color: var(--ig-secondary);
+    cursor: pointer;
+}
+
+.post-comments-link:hover {
+    color: var(--ig-text);
+}
+
+.post-pubdate {
+    padding: 2px 12px 0;
+    font-size: 10px;
+    color: var(--ig-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 </style>

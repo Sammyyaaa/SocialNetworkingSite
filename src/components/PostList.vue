@@ -12,8 +12,10 @@ import PostActions from "../components/PostActions.vue";
 
 <style scoped>
 .postList {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
+    display: flex;
+    flex-direction: column;
+    max-width: 470px;
+    margin: 16px auto 0;
+    width: 100%;
 }
 </style>
